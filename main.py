@@ -2,10 +2,16 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from rajiv import Rajiv
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+import tiktoken
+from typing import List
+from team import Team
 
 load_dotenv()
 
 app = FastAPI()
+
+chunks = []
 
 origins = [
     "http://localhost",
@@ -21,14 +27,35 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-async def initializeTeams():
-    print("teams")
-
+async def initializeTeams(chunks: List[str], websocket: WebSocket):
+    teams : List[Team] = []
+    summary = ""
+    index = 0
+    for chunk in chunks:
+        teams.append(Team(index, chunk, websocket))
+        index+=1
+    for team in teams:
+        summary += team.summarize()
+    return summary
 
 async def delegate(questions):
     print("delegate")
 
+def tiktoken_len(text):
+    tokens = tiktoken.get_encoding("cl100k_base").encode(text, disallowed_special=())
+    return len(tokens)
+
+@app.get("/")
+async def root(pdf: str):
+    global chunks
+
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=14500,
+        chunk_overlap=1000,
+        length_function=tiktoken_len,
+        separators=["\n\n", "\n", " ", ""]
+    )
+    chunks = text_splitter.split_text(pdf)
 
 @app.websocket("/stream")
 async def websocket_endpoint(websocket: WebSocket):
@@ -56,7 +83,7 @@ async def websocket_endpoint(websocket: WebSocket):
             For each question, you should specify which TA to designate it to, and its general topic, difficulty, and format.
         """
 
-        summary = initializeTeams()
+        summary = initializeTeams(chunks, websocket)
 
         prompt_1 = prompt_1.replace("\\INSTRUCTIONS", instructions)
         prompt_1 = prompt_1.replace("\\SUMMARY\\", summary)

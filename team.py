@@ -9,9 +9,10 @@ import asyncio
 
 
 class Team:
-    def __init__(self, context, websocket: WebSocket):
+    def __init__(self, name, context, websocket: WebSocket):
         load_dotenv()
         openai.api_key = os.environ.get("OPENAI_API_KEY")
+        self.name = name
         self.context = context
         self.websocket = websocket
 
