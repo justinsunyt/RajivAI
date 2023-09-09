@@ -65,6 +65,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
     try:
         instructions = await websocket.receive_json()
+        file = await websocket.receive_json()
         messages = []
 
         prompt_1 = f"""
