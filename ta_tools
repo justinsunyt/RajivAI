@@ -1,0 +1,15 @@
+import requests
+import xml.etree.ElementTree as ET
+
+app_id = "WYAJR5-633LT5JGG4"
+
+def query(question):
+    query_url = f"http://api.wolframalpha.com/v2/query?appid={app_id}&input={question}&podstate=Step-by-step&format=image"
+    r = requests.get(query_url)
+    print(r.text)
+    # content.replace("<subpod title='Possible intermediate steps'>", "*")
+    # content.replace("<states count='1'>", "*")
+    # content = content.split("*")
+    # print(content[0])
+
+(query("(1/2)∫√(2 - 2sin(u)) du"))

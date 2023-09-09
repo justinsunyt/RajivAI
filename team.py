@@ -4,6 +4,7 @@ from termcolor import colored
 from fastapi import WebSocket
 from dotenv import load_dotenv
 import asyncio
+import json
 
 
 class Team:
@@ -43,19 +44,21 @@ class Team:
                 await asyncio.sleep(0.01)
         return response_str
 
-    async def generate(self, question):
+    async def generate(self, question, difficulty, scheme):
         prompt_1 = f"""
             You are a college teaching assistant designed to help a fellow professor generate an exam and answer key for their course.
             The professor has given you the following details regarding the question:
 
-            \\QUESTION\\
+            Topic: \\QUESTION\\
+            Difficulty: \\DIFFICULTY\\
+            Format: \\SCHEME\\
 
-            The professor has also given you the following lecture notes:
+            The professor has also given you the following context:
 
             \\CONTEXT\\
 
             
-            You are partnered with another TA, who was given the same question and lecture notes.
+            You are partnered with another TA, who was given the same question and context.
             You are responsible for generating the question and the answer key.
             Rely strictly on the provided text and the professor's instructions, without including external information.
             Your partner will give feedback on the question. Refine your question accordingly.
@@ -69,11 +72,11 @@ class Team:
 
             \\QUESTION\\
 
-            The professor has also given you the following lecture notes:
+            The professor has also given you the following context:
 
             \\CONTEXT\\
 
-            You are partnered with another TA, who was given the same question and lecture notes.
+            You are partnered with another TA, who was given the same question and context.
             You are responsible for validating your partner's question and answer key.
             Rely strictly on the provided text and the professor's instructions, without including external information.
             Give feedback on the question. Your partner will refine their question accordingly.
@@ -82,9 +85,11 @@ class Team:
         """
 
         prompt_1 = prompt_1.replace("\\QUESTION\\", question)
+        prompt_1 = prompt_1.replace("\\DIFFICULTY\\", difficulty)
+        prompt_1 = prompt_1.replace("\\SCHEME\\", scheme)
         prompt_1 = prompt_1.replace("\\CONTEXT", self.context)
         prompt_2 = prompt_2.replace("\\QUESTION\\", question)
-        prompt_2 = prompt_2.capitalizereplace("\\CONTEXT", self.context)
+        prompt_2 = prompt_2.replace("\\CONTEXT", self.context)
 
         messages_1 = [{"role": "system", "content": prompt_1}]
         messages_2 = [{"role": "system", "content": prompt_2}]
@@ -115,6 +120,22 @@ class Team:
                 temperature=0,
                 messages=messages_2,
                 stream=True,
+                # function = [
+                #     {
+                #         "name": "solve",
+                #         "description": "A tool only for when you are stuck. It simplifies/solves a final equations or find simple facts required to solve the given question",
+                #         "parameters": {
+                #             "type": "object",
+                #             "properties": {
+                #                 "query": {
+                #                     "type": "string",
+                #                     "description": "the final equation or question to solve"
+                #                 }
+                #             },
+                #         },
+                #         "required": ["query"]
+                #     }
+                # ]
             )
 
             response_2_str = ""
@@ -127,5 +148,40 @@ class Team:
                     await self.websocket.send_text(token)
                     await asyncio.sleep(0.01)
 
-            messages_2.append({"role": "assistant", "content": response_2_str})
-            messages_1.append({"role": "user", "content": response_2_str})
+            # raw_function_name = ""        
+            # raw_function_args = ""
+            # for chunk in response_2:
+            #     if "content" in chunk["choices"][0]["delta"]:
+            #         token = chunk["choices"][0]["delta"]["content"]
+            #         if token != None:
+            #             response_str += token
+            #             print(colored(token, "green"), end="", flush=True)
+            #             await self.websocket.send_text(token)
+            #             await asyncio.sleep(0.01)
+            #     if chunk["choices"][0]["delta"].get("function_call"):
+            #         raw_function = chunk["choices"][0]["delta"]["function_call"]
+            #         if "name" in raw_function:
+            #             raw_function_name = raw_function["name"]
+            #         raw_function_args += raw_function["arguments"]
+            # messages_2.append({"role": "assistant", "content": response_2})
+
+            # if raw_function_name != "":
+            #     print("\n\n")
+            #     print(raw_function_args)
+
+            #     await asyncio.sleep(0.01)
+
+            #     function_args = json.loads(raw_function_args)
+            #     function_response = await self.delegate(
+            #         questions=function_args.get("questions"),
+            #     )
+            #     messages.append(
+            #         {
+            #             "role": "function",
+            #             "name": raw_function_name,
+            #             "content": str(function_response),
+            #         }
+            #     )
+
+            # messages_2.append({"role": "assistant", "content": response_2_str})
+            # messages_1.append({"role": "user", "content": response_2_str})

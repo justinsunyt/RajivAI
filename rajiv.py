@@ -31,6 +31,28 @@ class Rajiv:
                             "questions": {
                                 "type": "array",
                                 "description": "The TA team to generate the question, followed by the topic, difficulty, and format of each question",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string",
+                                            "description": "The name of the TA team"
+                                        },
+                                        "topic": {
+                                            "type": "string",
+                                            "description": "The topic of the question"
+                                        },
+                                        "difficulty": {
+                                            "type": "string",
+                                            "description": "The difficulty of the question"
+                                        },
+                                        "format": {
+                                            "type": "string",
+                                            "description": "The format of the question"
+                                        },
+
+                                    }
+                                }
                             },
                         },
                         "required": ["questions"],
@@ -45,10 +67,11 @@ class Rajiv:
         for chunk in response:
             if "content" in chunk["choices"][0]["delta"]:
                 token = chunk["choices"][0]["delta"]["content"]
-                response_str += token
-                print(colored(token, "green"), end="", flush=True)
-                await self.websocket.send_text(token)
-                await asyncio.sleep(0.01)
+                if token != None:
+                    response_str += token
+                    print(colored(token, "green"), end="", flush=True)
+                    await self.websocket.send_text(token)
+                    await asyncio.sleep(0.01)
             if chunk["choices"][0]["delta"].get("function_call"):
                 raw_function = chunk["choices"][0]["delta"]["function_call"]
                 if "name" in raw_function:

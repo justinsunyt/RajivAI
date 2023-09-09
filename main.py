@@ -12,6 +12,7 @@ load_dotenv()
 app = FastAPI()
 
 chunks = []
+teams = {}
 
 origins = [
     "http://localhost",
@@ -27,37 +28,41 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-async def initializeTeams(chunks: List[str], websocket: WebSocket):
-    teams : List[Team] = []
-    summary = ""
-    index = 1
-    for chunk in chunks:
-        teams.append(Team(index, chunk, websocket))
-        index += 1
-    index = 1
-    for team in teams:
-        summary += "Team " + index + ": " + team.summarize()
-        index += 1
-    return summary
-
-async def delegate(questions):
-    print("delegate")
-
 def tiktoken_len(text):
     tokens = tiktoken.get_encoding("cl100k_base").encode(text, disallowed_special=())
     return len(tokens)
 
-@app.get("/")
-async def root(pdf: str):
-    global chunks
+async def initializeTeams(pdf: str, websocket: WebSocket):
+    global teams
+    summary = ""
+    index = 1
 
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=14500,
         chunk_overlap=1000,
         length_function=tiktoken_len,
-        separators=["\n\n", "\n", " ", ""]
+        separators=["\n\n", "\n"]
     )
     chunks = text_splitter.split_text(pdf)
+
+    for chunk in chunks:
+        teams[f"Team {index}"] = Team(index, chunk, websocket)
+        index += 1
+    index = 1
+    for team in teams.values():
+        s = await team.summarize()
+        summary += f"Team {index}: {s} \n"
+        index += 1
+    return summary
+
+async def delegate(questions):
+    print(questions)
+    for question in questions:
+        await teams[question["name"]].generate(question["topic"], question["difficulty"], question["format"])
+
+# @app.get("/")
+# async def root(pdf: str):
+#     global chunks
 
 @app.websocket("/stream")
 async def websocket_endpoint(websocket: WebSocket):
@@ -67,7 +72,7 @@ async def websocket_endpoint(websocket: WebSocket):
         instructions = await websocket.receive_json()
         file = await websocket.receive_json()
         messages = []
-
+        print(instructions)
         prompt_1 = f"""
             You are RajivAI, a college professor designed to help a fellow professor generate an exam and answer key for their course.
             The professor has given you the following instructions regarding the exam:
@@ -86,9 +91,11 @@ async def websocket_endpoint(websocket: WebSocket):
             For each question, you should specify which TA to designate it to, and its general topic, difficulty, and format.
         """
 
-        summary = initializeTeams(chunks, websocket)
+        summary = await initializeTeams(file, websocket)
 
-        prompt_1 = prompt_1.replace("\\INSTRUCTIONS", instructions)
+        print("summary", summary)
+
+        prompt_1 = prompt_1.replace("\\INSTRUCTIONS", instructions[0]["content"])
         prompt_1 = prompt_1.replace("\\SUMMARY\\", summary)
 
         messages = [{"role": "system", "content": prompt_1}]
