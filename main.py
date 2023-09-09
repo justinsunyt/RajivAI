@@ -30,12 +30,14 @@ app.add_middleware(
 async def initializeTeams(chunks: List[str], websocket: WebSocket):
     teams : List[Team] = []
     summary = ""
-    index = 0
+    index = 1
     for chunk in chunks:
         teams.append(Team(index, chunk, websocket))
-        index+=1
+        index += 1
+    index = 1
     for team in teams:
-        summary += team.summarize()
+        summary += "Team " + index + ": " + team.summarize()
+        index += 1
     return summary
 
 async def delegate(questions):
