@@ -58,7 +58,7 @@ class Rajiv:
                     },
                 },
             ],
-            function_call="auto",
+            function_call={"name": "delegate"}
         )
         response_str = ""
         raw_function_name = ""
@@ -78,7 +78,7 @@ class Rajiv:
                 raw_function_args += raw_function["arguments"]
         messages.append({"role": "assistant", "content": response})
 
-        if raw_function_name != "":
+        if raw_function_name == "delegate":
             print("\n\n")
             print(raw_function_args)
 
@@ -93,5 +93,14 @@ class Rajiv:
                     "role": "function",
                     "name": raw_function_name,
                     "content": str(function_response),
+                }
+            )
+
+            messages.append(
+                {
+                    "role": "system",
+                    "content": f"""You have just received the questions and answers from the TAs.
+                    Output the final questions and the final answers and explanations separately.
+                    """
                 }
             )

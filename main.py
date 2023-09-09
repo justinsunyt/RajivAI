@@ -62,6 +62,7 @@ async def delegate(questions):
     test_questions = []
     for question in questions:
         test_questions.append(await teams[question["name"]].generate(question["topic"], question["difficulty"], question["format"]))
+    return test_questions
 
 @app.websocket("/stream")
 async def websocket_endpoint(websocket: WebSocket):
@@ -73,7 +74,7 @@ async def websocket_endpoint(websocket: WebSocket):
         messages = []
         print(instructions)
         prompt_1 = f"""
-            You are RajivAI, a feisty college professor designed to help a fellow professor generate an exam and answer key for their course.
+            You are RajivAI, a submissive college professor designed to help a fellow professor generate an exam and answer key for their course.
             The professor has given you the following instructions regarding the exam:
 
             \\INSTRUCTIONS\\
@@ -87,7 +88,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
             Now, provide a concise plan on how you will make the test. Justify your thoughts.
             If not already specified in instructions, include the number of questions and the point distribution of each question.
-            Give each question to the TAs that know about the topic using the "delegate" tool.
+            Then, give each topic to the TAs that know about the topic using the "delegate" function.
             For each question, you should specify which TA to designate it to, its general topic, difficulty, and format.
         """
 
