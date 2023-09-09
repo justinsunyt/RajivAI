@@ -39,7 +39,7 @@ async def initializeTeams(pdf: str, websocket: WebSocket):
 
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=14500,
-        chunk_overlap=1000,
+        chunk_overlap=200,
         length_function=tiktoken_len,
         separators=["\n\n", "\n"]
     )
@@ -56,13 +56,9 @@ async def initializeTeams(pdf: str, websocket: WebSocket):
     return summary
 
 async def delegate(questions):
-    print(questions)
+    test_questions = []
     for question in questions:
-        await teams[question["name"]].generate(question["topic"], question["difficulty"], question["format"])
-
-# @app.get("/")
-# async def root(pdf: str):
-#     global chunks
+        test_questions.append(await teams[question["name"]].generate(question["topic"], question["difficulty"], question["format"]))
 
 @app.websocket("/stream")
 async def websocket_endpoint(websocket: WebSocket):
