@@ -64,10 +64,7 @@ async def websocket_endpoint(websocket: WebSocket):
         messages = [{"role": "system", "content": prompt_1}]
 
         rajiv = Rajiv(delegate, websocket)
-        while True:
-            user_input = await websocket.receive_json()
-            messages.extend(user_input)
-            await rajiv.run(messages)
+        await rajiv.run(messages)
     except RuntimeError as e:
         print(e)
     except WebSocketDisconnect:
