@@ -24,11 +24,10 @@ class Team:
             You are a college teaching assistant. Summarize the following lecture notes:
 
             \\CONTEXT\\
-
-            Craft a summary that is detailed, thorough, in-depth, and complex, while maintaining clarity and conciseness.
-            Incorporate main ideas and essential information, eliminating extraneous language and focusing on critical aspects.
+            
+            List the topics and techniques covered concisely.
             Rely strictly on the provided text, without including external information.
-            Format the summary in paragraph form for easy understanding.
+            Format the summary in bullet point form.
         """
         prompt = prompt.replace("\\CONTEXT\\", self.context)
 
@@ -60,7 +59,6 @@ class Team:
             The professor has also given you the following context:
 
             \\CONTEXT\\
-
             
             You are partnered with another TA, who was given the same question and context.
             You are responsible for generating the question and the answer key.
@@ -74,7 +72,7 @@ class Team:
             You are a very critical and analytical college teaching assistant designed to help a fellow professor generate an exam and answer key for their course.
             The professor has given you the following details regarding the question:
 
-            Question: \\QUESTION\\
+            Topic: \\QUESTION\\
             Difficulty: \\DIFFICULTY\\
             Format: \\SCHEME\\
 
@@ -95,10 +93,10 @@ class Team:
         prompt_1 = prompt_1.replace("\\DIFFICULTY\\", difficulty)
         prompt_1 = prompt_1.replace("\\SCHEME\\", scheme)
         prompt_1 = prompt_1.replace("\\CONTEXT", self.context)
-        prompt_1 = prompt_1.replace("\\QUESTION\\", question)
-        prompt_1 = prompt_1.replace("\\DIFFICULTY\\", difficulty)
-        prompt_1 = prompt_1.replace("\\SCHEME\\", scheme)
-        prompt_1 = prompt_1.replace("\\CONTEXT", self.context)
+        prompt_2 = prompt_2.replace("\\QUESTION\\", question)
+        prompt_2 = prompt_2.replace("\\DIFFICULTY\\", difficulty)
+        prompt_2 = prompt_2.replace("\\SCHEME\\", scheme)
+        prompt_2 = prompt_2.replace("\\CONTEXT", self.context)
 
         messages_1 = [{"role": "system", "content": prompt_1}]
         messages_2 = [{"role": "system", "content": prompt_2}]

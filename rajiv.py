@@ -36,23 +36,22 @@ class Rajiv:
                                     "properties": {
                                         "name": {
                                             "type": "string",
-                                            "description": "The name of the TA team"
+                                            "description": "The name of the TA team",
                                         },
                                         "topic": {
                                             "type": "string",
-                                            "description": "The topic of the question"
+                                            "description": "The topic of the question",
                                         },
                                         "difficulty": {
                                             "type": "string",
-                                            "description": "The difficulty of the question"
+                                            "description": "The difficulty of the question",
                                         },
                                         "format": {
                                             "type": "string",
-                                            "description": "The format of the question"
+                                            "description": "The format of the question",
                                         },
-
-                                    }
-                                }
+                                    },
+                                },
                             },
                         },
                         "required": ["questions"],

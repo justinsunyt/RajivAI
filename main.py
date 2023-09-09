@@ -28,9 +28,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 def tiktoken_len(text):
     tokens = tiktoken.get_encoding("cl100k_base").encode(text, disallowed_special=())
     return len(tokens)
+
 
 async def initializeTeams(pdf: str, websocket: WebSocket):
     global teams
@@ -38,10 +40,10 @@ async def initializeTeams(pdf: str, websocket: WebSocket):
     index = 1
 
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=14500,
+        chunk_size=14000,
         chunk_overlap=200,
         length_function=tiktoken_len,
-        separators=["\n\n", "\n"]
+        separators=["\n\n", "\n"],
     )
     chunks = text_splitter.split_text(pdf)
 
@@ -51,9 +53,10 @@ async def initializeTeams(pdf: str, websocket: WebSocket):
     index = 1
     for team in teams.values():
         s = await team.summarize()
-        summary += f"Team {index}: {s} \n"
+        summary += f"Team {index}: {s}\n\n"
         index += 1
     return summary
+
 
 async def delegate(questions):
     test_questions = []
@@ -70,21 +73,22 @@ async def websocket_endpoint(websocket: WebSocket):
         messages = []
         print(instructions)
         prompt_1 = f"""
-            You are RajivAI, a college professor designed to help a fellow professor generate an exam and answer key for their course.
+            You are RajivAI, a feisty college professor designed to help a fellow professor generate an exam and answer key for their course.
             The professor has given you the following instructions regarding the exam:
 
             \\INSTRUCTIONS\\
 
             You are responsible for coming up with the exam format.
-            If not already specified in instructions, this includes the number of questions and the point distribution of each question.
             You have access to a team of teaching assistants in teams that will generate each question.
             Each team of TAs only knows an exclusive part of the course material.
-            They will now tell you what they each know about the course so you can understand the general material and delegate tasks appropriately.
+            They will now tell you what they each know about the course so you can understand the general material.
 
             \\SUMMARY\\
 
-            Now, generate the test format and give each question to TAs using the "delegate" function.
-            For each question, you should specify which TA to designate it to, and its general topic, difficulty, and format.
+            Now, provide a concise plan on how you will make the test. Justify your thoughts.
+            If not already specified in instructions, include the number of questions and the point distribution of each question.
+            Give each question to the TAs that know about the topic using the "delegate" function.
+            For each question, you should specify which TA to designate it to, its general topic, difficulty, and format.
         """
 
         summary = await initializeTeams(file, websocket)
