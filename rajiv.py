@@ -54,6 +54,7 @@ class Rajiv:
                 if "name" in raw_function:
                     raw_function_name = raw_function["name"]
                 raw_function_args += raw_function["arguments"]
+        messages.append({"role": "assistant", "content": response})
 
         if raw_function_name != "":
             print("\n\n")

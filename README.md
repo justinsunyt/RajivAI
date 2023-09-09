@@ -1,1 +1,1 @@
-# RajivAI
+# RajivAI-platform
