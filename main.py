@@ -87,7 +87,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
             Now, provide a concise plan on how you will make the test. Justify your thoughts.
             If not already specified in instructions, include the number of questions and the point distribution of each question.
-            Give each question to the TAs that know about the topic using the "delegate" function.
+            Give each question to the TAs that know about the topic using the "delegate" tool.
             For each question, you should specify which TA to designate it to, its general topic, difficulty, and format.
         """
 
