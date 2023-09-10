@@ -17,6 +17,7 @@ class Rajiv:
 
     async def run(self, messages: List[dict]):
         await self.websocket.send_text("//Rajiv-delegation//")
+
         response = openai.ChatCompletion.create(
             model="gpt-4",
             temperature=0,
@@ -25,7 +26,7 @@ class Rajiv:
             functions=[
                 {
                     "name": "delegate",
-                    "description": "Delegate questions for each TA team",
+                    "description": "Delegate questions to the best fit TA team",
                     "parameters": {
                         "type": "object",
                         "properties": {
@@ -93,15 +94,42 @@ class Rajiv:
                 {
                     "role": "function",
                     "name": raw_function_name,
-                    "content": str(function_response),
+                    "content": function_response,
                 }
             )
-            await self.websocket.send_text("//Rajiv-output")
-            messages.append(
-                {
-                    "role": "system",
-                    "content": f"""You have just received the questions and answers from the TAs.
-                    Output the final questions and the final answers and explanations separately.
-                    """
-                }
+            await self.websocket.send_text("//Rajiv-output//")
+
+            message_new = []
+            message_new.extend(
+                [
+                    {
+                        "role": "system",
+                        "content": """You will receive the questions and answers from the TAs. Each
+                        question answer set is separated by //SPACE//. First, number and output all 
+                        questions. Then, output the answers and explanations with numbers corresponding to their respective
+                        question. 
+                        """
+                    },
+                    {
+                        "role": "user",
+                        "content": function_response
+                    }
+                ]
             )
+            output_response = openai.ChatCompletion.create(
+                model="gpt-4",
+                temperature=0,
+                messages=message_new,
+                stream=True
+            )
+            response = ""
+            for chunk in output_response:
+                if "content" in chunk["choices"][0]["delta"]:
+                    token = chunk["choices"][0]["delta"]["content"]
+                    if token != None:
+                        response += token
+                        print(colored(token, "light_magenta"), end="", flush=True)
+                        await self.websocket.send_text(token)
+                        await asyncio.sleep(0.01)
+            message_new.append({"role": "assistant", "content": response})
+
