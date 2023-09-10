@@ -10,13 +10,13 @@ RUN apt-get update && apt-get install -y \
     libx11-6 \
     build-essential \
     libssl-dev \
- && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
- # Create a working directory.
+# Create a working directory.
 RUN mkdir /app
 WORKDIR /app
 
 COPY . /app/
 RUN pip install -r requirements.txt
 
-CMD ["gunicorn", "main:app", "--bind", "[::]:8080", "-k", "uvicorn.workers.UvicornWorker"]
+CMD ["uvicorn", "app.__main__:app", "--host", "0.0.0.0", "--port", "8080"]
