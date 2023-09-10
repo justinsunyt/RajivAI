@@ -15,12 +15,9 @@ class Team:
         self.name = name
         self.context = context
         self.websocket = websocket
-        self.available_functions = {
-            "solve": query
-        }
+        self.available_functions = {"solve": query}
 
     async def summarize(self):
-
         await self.websocket.send_text(f"//Team{self.name}-summarizing//")
 
         prompt = f"""
@@ -54,18 +51,19 @@ class Team:
         await self.websocket.send_text(f"Team{self.name}-generating")
         prompt_1 = f"""
             You are a college teaching assistant helping your professor create a question and answer for their exam.
+            You know the following course material:
+
+            \\CONTEXT\\
+            
             The professor has given you the following details regarding the question:
 
             Topic: \\QUESTION\\
             Difficulty: \\DIFFICULTY\\
             Format: \\SCHEME\\
-                
-            You know the following course material:
-
-            \\CONTEXT\\
             
             You are partnered with another TA, who was given the same details and context.
             You are responsible for generating the question and the answer key with explanations.
+            Strictly follow the given topic, difficulty, and format!
             Rely strictly on the provided material and the professor's instructions, without including external information.
             Your partner will give feedback on the question. Refine your question accordingly.
             Only output the question and the answer. 
@@ -76,16 +74,16 @@ class Team:
 
         prompt_2 = f"""
             You are a very critical and analytical college teaching assistant helping your professor create a question and answer for their exam.
+            You know the following course material:
+
+            \\CONTEXT\\
+
             The professor has given you the following details regarding the question:
 
             Topic: \\QUESTION\\
             Difficulty: \\DIFFICULTY\\
             Format: \\SCHEME\\
-
-            The professor has also given you the following context:
-
-            \\CONTEXT\\
-
+                
             You are partnered with another TA, who was given the same details and context.
             You are will receive your partner's question and answers. Without looking at the answer key, do the question.
             If you have the same answer as the key, use the provided "stop" function and output the final question and answer.
@@ -110,7 +108,7 @@ class Team:
         messages_2 = [{"role": "system", "content": prompt_2}]
 
         iterations = 0
-        while (True and iterations < 3):
+        while True and iterations < 3:
             # print(iterations)
             response_1 = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo-16k",
@@ -139,9 +137,7 @@ class Team:
                     Here is the question and possible solution: {response_1_str}
                 """
                 messages_1.append({"role": "assistant", "content": response_1_str})
-                messages_2.append(
-                    {"role": "system", "content": req_to_2_system}
-                )
+                messages_2.append({"role": "system", "content": req_to_2_system})
 
                 await self.websocket.send_text(f"Team{self.name}-validating")
 
@@ -160,16 +156,16 @@ class Team:
                                     "dummy_property": {
                                         "type": "null",
                                     }
-                                }
+                                },
                             },
-                            "required": []
+                            "required": [],
                         }
-                    ]
+                    ],
                 )
 
                 response_2_str = ""
 
-                raw_function_name = ""        
+                raw_function_name = ""
                 raw_function_args = ""
                 for chunk in response_2:
                     if "content" in chunk["choices"][0]["delta"]:
@@ -186,12 +182,17 @@ class Team:
                         raw_function_args += raw_function["arguments"]
 
                 messages_2.append({"role": "assistant", "content": response_2_str})
-                messages_1.append({"role": "system", "content": f"correct your previous outputed question and answer based on these suggestions: {response_2_str}"})
+                messages_1.append(
+                    {
+                        "role": "system",
+                        "content": f"correct your previous outputed question and answer based on these suggestions: {response_2_str}",
+                    }
+                )
 
                 if raw_function_name == "stop":
                     iterations = 5
                     # print(response_1_str)
-                    return response_1_str     
+                    return response_1_str
 
             iterations += 1
         return response_1_str
