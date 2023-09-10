@@ -38,7 +38,7 @@ class Rajiv:
                                     "properties": {
                                         "name": {
                                             "type": "string",
-                                            "description": "The name of the TA team",
+                                            "description": "The name of the TA team, example: Team 1",
                                         },
                                         "topic": {
                                             "type": "string",
@@ -60,24 +60,23 @@ class Rajiv:
                     },
                 },
             ],
-            function_call={"name": "delegate"}
+            function_call={"name": "delegate"},
         )
         response_str = ""
         raw_function_name = ""
         raw_function_args = ""
         for chunk in response:
-            if "content" in chunk["choices"][0]["delta"]:
-                token = chunk["choices"][0]["delta"]["content"]
-                if token != None:
-                    response_str += token
-                    print(colored(token, "green"), end="", flush=True)
-                    await self.websocket.send_text(token)
-                    await asyncio.sleep(0.01)
             if chunk["choices"][0]["delta"].get("function_call"):
                 raw_function = chunk["choices"][0]["delta"]["function_call"]
                 if "name" in raw_function:
                     raw_function_name = raw_function["name"]
                 raw_function_args += raw_function["arguments"]
+                if raw_function["arguments"] != None:
+                    print(
+                        colored(raw_function["arguments"], "green"), end="", flush=True
+                    )
+                    await self.websocket.send_text(raw_function["arguments"])
+                    await asyncio.sleep(0.01)
         messages.append({"role": "assistant", "content": response})
 
         if raw_function_name == "delegate":
@@ -126,19 +125,13 @@ class Rajiv:
                         ...
                         '''
                         Inside the square brackets hold descriptions for what should be in its place. The ellipses are placeholders for more entries of trivially different description
-                        """
+                        """,
                     },
-                    {
-                        "role": "user",
-                        "content": function_response
-                    }
+                    {"role": "user", "content": function_response},
                 ]
             )
             output_response = openai.ChatCompletion.create(
-                model="gpt-4",
-                temperature=0,
-                messages=message_new,
-                stream=True
+                model="gpt-4", temperature=0, messages=message_new, stream=True
             )
             response = ""
             for chunk in output_response:
@@ -150,4 +143,3 @@ class Rajiv:
                         await self.websocket.send_text(token)
                         await asyncio.sleep(0.01)
             message_new.append({"role": "assistant", "content": response})
-

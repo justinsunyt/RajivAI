@@ -88,6 +88,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
             \\INSTRUCTIONS\\
 
+            Follow the instructions closely and pass down relevant details to TAs.
             Unless otherwise specified, you are responsible for coming up with the exam format.
             You have access to a group of teaching assistant teams that will generate each question.
             Each team of TAs only knows an exclusive part of the course material.
