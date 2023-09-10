@@ -64,7 +64,6 @@ async def delegate(questions):
     for question in questions:
         test_questions.append(await teams[question["name"]].generate(question["topic"], question["difficulty"], question["format"]))
     
-    print(test_questions)
     r = "//SPACE//".join(test_questions)
     return r
 

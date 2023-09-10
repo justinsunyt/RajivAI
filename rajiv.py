@@ -99,15 +99,33 @@ class Rajiv:
             )
             await self.websocket.send_text("//Rajiv-output//")
 
+            print(function_response)
             message_new = []
             message_new.extend(
                 [
                     {
                         "role": "system",
                         "content": """You will receive the questions and answers from the TAs. Each
-                        question answer set is separated by //SPACE//. First, number and output all 
-                        questions. Then, output the answers and explanations with numbers corresponding to their respective
-                        question. 
+                        set of question and corresponding answer is separated by //SPACE//. Your job
+                        is to separate the questions and the answer/explanations.
+
+                        Use the following format deliminated between the ticks:
+                        '''
+                        //QUESTIONS//
+                        1. [question 1]
+                        2. [question 2]
+                        3. [question 3]
+                        ...
+                        ...
+
+                        //ANSWERS//
+                        1. [answer and explanation to question 1]
+                        2. [answer and explanation to question 2]
+                        3. [answer and explanation to question 3]
+                        ...
+                        ...
+                        '''
+                        Inside the square brackets hold descriptions for what should be in its place. The ellipses are placeholders for more entries of trivially different description
                         """
                     },
                     {

@@ -45,7 +45,7 @@ class Team:
             if "content" in chunk["choices"][0]["delta"]:
                 token = chunk["choices"][0]["delta"]["content"]
                 response_str += token
-                print(colored(token, "green"), end="", flush=True)
+                # print(colored(token, "green"), end="", flush=True)
                 await self.websocket.send_text(token)
                 await asyncio.sleep(0.01)
         return response_str
@@ -75,7 +75,7 @@ class Team:
         """
 
         prompt_2 = f"""
-            You are a college teaching assistant helping your professor create a question and answer for their exam.
+            You are a very critical and analytical college teaching assistant helping your professor create a question and answer for their exam.
             The professor has given you the following details regarding the question:
 
             Topic: \\QUESTION\\
@@ -111,7 +111,7 @@ class Team:
 
         iterations = 0
         while (True and iterations < 3):
-            print(iterations)
+            # print(iterations)
             response_1 = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo-16k",
                 temperature=1,
@@ -125,12 +125,12 @@ class Team:
                 if "content" in chunk["choices"][0]["delta"]:
                     token = chunk["choices"][0]["delta"]["content"]
                     response_1_str += token
-                    print(colored(token, "green"), end="", flush=True)
+                    # print(colored(token, "green"), end="", flush=True)
                     await self.websocket.send_text(token)
                     await asyncio.sleep(0.01)
 
             if iterations != 2:
-                print("\n")
+                # print("\n")
                 req_to_2_system = f"""
                     You will be given a question and a possible solution.
                     Explicity solve the question without looking at the possible solution.
@@ -139,9 +139,9 @@ class Team:
                     Here is the question and possible solution: {response_1_str}
                 """
                 messages_1.append({"role": "assistant", "content": response_1_str})
-                messages_2.extend([
+                messages_2.append(
                     {"role": "system", "content": req_to_2_system}
-                ])
+                )
 
                 await self.websocket.send_text(f"Team{self.name}-validating")
 
@@ -176,7 +176,7 @@ class Team:
                         token = chunk["choices"][0]["delta"]["content"]
                         if token != None:
                             response_2_str += token
-                            print(colored(token, "blue"), end="", flush=True)
+                            # print(colored(token, "blue"), end="", flush=True)
                             await self.websocket.send_text(token)
                             await asyncio.sleep(0.01)
                     if chunk["choices"][0]["delta"].get("function_call"):
@@ -190,7 +190,7 @@ class Team:
 
                 if raw_function_name == "stop":
                     iterations = 5
-                    print(response_1_str)
+                    # print(response_1_str)
                     return response_1_str     
 
             iterations += 1
