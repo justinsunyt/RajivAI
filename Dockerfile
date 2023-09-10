@@ -19,4 +19,4 @@ WORKDIR /app
 COPY . /app/
 RUN pip install -r requirements.txt
 
-CMD ["uvicorn", "app.__main__:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD exec gunicorn --bind :$PORT --workers 2 --threads 8 --timeout 0 main:app
