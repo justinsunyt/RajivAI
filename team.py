@@ -20,6 +20,9 @@ class Team:
         }
 
     async def summarize(self):
+
+        await self.websocket.send_text(f"//Team{self.name}-summarizing//")
+
         prompt = f"""
             You are a college teaching assistant. Summarize the following lecture notes:
 
@@ -48,6 +51,7 @@ class Team:
         return response_str
 
     async def generate(self, question, difficulty, scheme):
+        await self.websocket.send_text(f"Team{self.name}-generating")
         prompt_1 = f"""
             You are a college teaching assistant helping your professor create a question and answer for their exam.
             The professor has given you the following details regarding the question:
@@ -134,6 +138,9 @@ class Team:
             """
             messages_1.append({"role": "assistant", "content": response_1_str})
             messages_2.append({"role": "user", "content": req_to_2})
+
+
+            await self.websocket.send_text(f"Team{self.name}-validating")
 
             response_2 = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo-16k",

@@ -16,6 +16,7 @@ class Rajiv:
         self.websocket = websocket
 
     async def run(self, messages: List[dict]):
+        await self.websocket.send_text("//Rajiv-delegation//")
         response = openai.ChatCompletion.create(
             model="gpt-4",
             temperature=0,
@@ -95,7 +96,7 @@ class Rajiv:
                     "content": str(function_response),
                 }
             )
-
+            await self.websocket.send_text("//Rajiv-output")
             messages.append(
                 {
                     "role": "system",
