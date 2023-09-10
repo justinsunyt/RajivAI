@@ -6,6 +6,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import tiktoken
 from typing import List
 from team import Team
+import openai
 
 load_dotenv()
 
@@ -62,7 +63,9 @@ async def delegate(questions):
     test_questions = []
     for question in questions:
         test_questions.append(await teams[question["name"]].generate(question["topic"], question["difficulty"], question["format"]))
-    return test_questions
+    
+    r = "//SPACE//".join(test_questions)
+    return r
 
 @app.websocket("/stream")
 async def websocket_endpoint(websocket: WebSocket):
@@ -79,8 +82,8 @@ async def websocket_endpoint(websocket: WebSocket):
 
             \\INSTRUCTIONS\\
 
-            You are responsible for coming up with the exam format.
-            You have access to a team of teaching assistants in teams that will generate each question.
+            Unless otherwise specified, you are responsible for coming up with the exam format.
+            You have access to a group of teaching assistant teams that will generate each question.
             Each team of TAs only knows an exclusive part of the course material.
             They will now tell you what they each know about the course so you can understand the general material.
 

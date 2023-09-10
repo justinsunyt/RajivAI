@@ -134,7 +134,7 @@ class Team:
                 Here is a question: {response_1_str}
                 Do the question without looking at the answer key.
                 Then, compare answers. If correct, then use the stop function.
-                Otherwise, output suggestions to change the question.
+                Otherwise, output suggestions to change the question/answer.
             """
             messages_1.append({"role": "assistant", "content": response_1_str})
             messages_2.append({"role": "user", "content": req_to_2})
