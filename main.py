@@ -19,6 +19,7 @@ origins = [
     "http://localhost",
     "http://localhost:8080",
     "http://localhost:3000",
+    "https://rajiv.app",
 ]
 
 app.add_middleware(
@@ -62,10 +63,15 @@ async def initializeTeams(pdf: str, websocket: WebSocket):
 async def delegate(questions):
     test_questions = []
     for question in questions:
-        test_questions.append(await teams[question["name"]].generate(question["topic"], question["difficulty"], question["format"]))
-    
+        test_questions.append(
+            await teams[question["name"]].generate(
+                question["topic"], question["difficulty"], question["format"]
+            )
+        )
+
     r = "//SPACE//".join(test_questions)
     return r
+
 
 @app.websocket("/stream")
 async def websocket_endpoint(websocket: WebSocket):
